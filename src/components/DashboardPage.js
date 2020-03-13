@@ -13,7 +13,6 @@ class DashboardPage extends React.Component {
         super(props);
 
         this.state = {
-            tableData : [],
             lineChartData : [],
             metrics : [],
             isLoaded : false
@@ -24,7 +23,23 @@ class DashboardPage extends React.Component {
     componentDidMount() {
         this.fetchData();
     }
-    
+
+    handleCheck = (event) =>{
+
+        let targetMetricKey = event.target.id;
+
+        let metrics = [...this.state.metrics];
+        metrics.forEach(metric => {
+            if(metric["key"] === targetMetricKey ) {
+                metric["isEnabled"] = !metric["isEnabled"];
+            }
+        })
+       
+        this.setState(prevState => ({
+            metrics
+        }));
+    }
+
     render() {
         return (
           <div>
@@ -32,7 +47,7 @@ class DashboardPage extends React.Component {
                 (
                     <Container fluid>
                         <Row className="justify-content-md-center">
-                            <Col><TableView data={this.state.tableData} /></Col>
+                            <Col><TableView data={this.state.metrics} handleCheck={this.handleCheck} /></Col>
                             <Col><LineGraphView data={this.state.lineChartData} metricKeys={this.state.metrics}/></Col>
                         </Row>
                     </Container>) : 
@@ -53,6 +68,7 @@ class DashboardPage extends React.Component {
             this.populateTargetMetrics();
             this.populateTableData();
             this.populateLineChartData();
+            this.setState(() => ({isLoaded : true}))
         })
         .catch(error => {
             console.log(this.props  );
@@ -69,26 +85,24 @@ class DashboardPage extends React.Component {
         let metrics = keysStartingWithRD.map(metricKey =>  { 
             return  {
                 key : metricKey,
-                color :'rgb(' + (Math.floor(Math.random() * 256)) + ',' + (Math.floor(Math.random() * 256)) + ',' + (Math.floor(Math.random() * 256)) + ')'
+                color :'rgb(' + (Math.floor(Math.random() * 256)) + ',' + (Math.floor(Math.random() * 256)) + ',' + (Math.floor(Math.random() * 256)) + ')',
+                isEnabled : false
             }
         });
 
         this.setState(() => ({metrics }))
-
       }
 
       populateTableData() {
         
-        let tableData = [];
-        this.state.metrics.forEach((key) => {
+        let metrics = [...this.state.metrics];
+        metrics.forEach((key) => {
             let metricKey = key["key"];
             let values = this.props.data[metricKey]["values"];
-            tableData.push({key : metricKey, value : this.round(values[values.length -1], 2)})
+            key["value"] = this.round(values[values.length -1], 2)
         });
 
-        this.setState(() => ({ tableData  : tableData}));
-        console.log("Table Data");
-        console.log(this.state.tableData);
+        this.setState(() => ({ metrics}));
       }
 
       populateLineChartData() {
@@ -107,7 +121,6 @@ class DashboardPage extends React.Component {
         });
 
         this.setState(() => ({ lineChartData  : lineChartData}));
-        this.setState(() => ({isLoaded : true}))
       }
 
        round(value, decimals) {

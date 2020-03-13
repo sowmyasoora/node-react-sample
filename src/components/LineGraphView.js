@@ -17,11 +17,11 @@ export default (props) => {
                 <XAxis dataKey="time" />
                 <YAxis />
                 <Tooltip />
-                {/* <Legend /> */}
+                <Legend />
 
-                { props.metricKeys.map((metric, index) => {
-                    return  (<Line key={index} type="monotone" dataKey={metric["key"]} stroke={metric["color"]} activeDot={{ r: 8 }} />)
-                })}
+                { props.metricKeys.map((metric, index) => 
+                    metric["isEnabled"] ? ( <Line key={index} type="monotone" dataKey={metric["key"]} stroke={metric["color"]} activeDot={{ r: 8 }} />) : ''
+                )}
         </LineChart>
       </div>
     )}
